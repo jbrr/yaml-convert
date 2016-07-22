@@ -16,11 +16,29 @@ class YamlConvert
       key_values = embedded_keys.reverse.inject(value) { |a, n| { n => a } }
       output.deep_merge(key_values)
     end
-    write_file
+  ensure_quotes(output)
+  write_file
+  end
+
+  def ensure_quotes(h)
+    h.each do |k, v|
+      if v.is_a?(Hash)
+        ensure_quotes(v)
+        next
+      end
+      if h[k].is_a?(String)
+        h[k] = v + "__ensure_quotes__\n "
+      elsif h[k].is_a?(Array)
+        h[k] = h[k].map do |element|
+          element += "__ensure_quotes__\n "
+        end
+      end
+    end
   end
 
   def write_file
-    File.open(output_path, 'w') { |f| YAML.dump(output, f)}
+    File.open(output_path, 'w') { |f| YAML.dump(output, f, line_width: -1)}
+    `sed -i '' "s/__ensure_quotes__[\\]n //g" #{output_path}`
   end
 end
 
