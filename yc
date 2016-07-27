@@ -1,6 +1,0 @@
-#! /usr/bin/env ruby
-require_relative "yaml-convert"
-
-filename = ARGV[0]
-output = ARGV[1]
-YamlConvert.new(filename, output).create_hash

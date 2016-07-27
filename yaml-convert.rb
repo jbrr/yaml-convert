@@ -1,13 +1,15 @@
 require 'yaml'
+require 'pry'
 
 class YamlConvert
-  attr_reader :path, :yml, :output, :output_path
+  attr_reader :path, :yml, :output, :output_path, :language
 
-  def initialize(path, output_path)
+  def initialize(path, output_path, language = nil)
     @path = path
     @output_path = output_path
     @yml = YAML.load_file(path)
     @output = {}
+    @language = language
   end
 
   def create_hash
@@ -37,7 +39,11 @@ class YamlConvert
   end
 
   def write_file
-    File.open(output_path, 'w') { |f| YAML.dump(output, f, line_width: -1)}
+    if language
+      final_output = {}
+      final_output.store(language, output)
+    end
+    File.open(output_path, 'w') { |f| YAML.dump(final_output, f, line_width: -1)}
     `sed -i '' "s/__ensure_quotes__[\\]n //g" #{output_path}`
   end
 end
